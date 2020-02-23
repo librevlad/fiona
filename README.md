@@ -1,25 +1,43 @@
-# Librevlad Fiona
+# Fiona
 
-Work in progress
+Библиотека для парсинга ФИО на PHP.
 
-## Installation
+## Установка
 
-You can install the package via composer:
+ Подключить через composer:
 
 ```bash
 composer require librevlad/fiona
 ```
 
-## Usage
+## Использование
 
-Work In Progress. This means that the API may change at any time.
+В активной разработке.
 
-## Testing
+```php
+
+$fiona = new \Librevlad\Fiona\Detector();
+$data = $fiona->detect('Иванов Иван Иванович');
+
+```
+
+```
+
+array:5 [
+  "first_name" => Иван
+  "last_name" => Иванов
+  "patronymic" => Иванович
+  "gender" => male
+  "unmatched_segments" => []
+]
+```
+
+## Тестирование
 
 ```bash
 composer test
 ```
 
-## License
+## Лицензия
 
 The MIT License (MIT).
