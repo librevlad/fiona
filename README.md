@@ -12,8 +12,6 @@ composer require librevlad/fiona
 
 ## Использование
 
-В активной разработке.
-
 ```php
 
 $fiona = new \Librevlad\Fiona\Detector();
