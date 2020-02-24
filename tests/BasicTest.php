@@ -8,8 +8,10 @@ class BasicTest extends TestCase {
 
     public function testBasicApi() {
         $fiona = new \Librevlad\Fiona\Detector();
-        $data  = $fiona->detect( 'Алина Борисовна Ыыва Sdfg Ывап Хотченкова' );
+        $data  = $fiona->detect( 'Петров Иван Сергеевич' );
         $this->assertEquals( $data[ 'first_name' ], 'Иван' );
+        $this->assertEquals( $data[ 'last_name' ], 'Петров' );
+        $this->assertEquals( $data[ 'patronymic' ], 'Сергеевич' );
     }
 
 }
