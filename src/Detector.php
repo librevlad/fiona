@@ -31,9 +31,48 @@ class Detector {
 
 
         $possibilitiesBySegment = $this->getPossibilitiesBySegment( $segments );
+        $stats                  = $this->stats( $possibilitiesBySegment );
+
+        $return [ 'gender' ] = $stats[ 'gender' ];
+        $stats               = $stats[ 'stats' ];
 
 
-//        dd( $possibilitiesBySegment );
+        while ( $cs = $this->bestConfidenceScore( $stats ) ) {
+
+            if ( ! $cs[ 'segment' ] ) {
+                break;
+            }
+
+            if ( ! $return[ $cs[ 'segment' ] ] ) {
+                $return[ $cs[ 'segment' ] ] = $cs[ 'value' ];
+            }
+
+            foreach ( $stats as $segment => &$values ) {
+                $newValues = [];
+                foreach ( $values as $k => $v ) {
+                    if ( $k != $cs[ 'value' ] ) {
+                        $newValues [ $k ] = $v;
+                    }
+                }
+                $values = $newValues;
+            }
+
+        }
+
+        $matched   = array_intersect( $segments, [
+            $return[ 'first_name' ],
+            $return[ 'last_name' ],
+            $return[ 'patronymic' ],
+        ] );
+        $unmatched = array_diff( $segments, $matched );
+        if ( count( $unmatched ) && ! $return[ 'last_name' ] ) {
+            $return[ 'last_name' ] = array_shift( $unmatched );
+        }
+        if ( count( $unmatched ) && ! $return[ 'patronymic' ] ) {
+            $return[ 'patronymic' ] = array_shift( $unmatched );
+        }
+
+        $return[ 'unmatched_segments' ] = $unmatched;
 
         return $return;
 
@@ -65,6 +104,44 @@ class Detector {
 
     }
 
+    public function mostPopular( $gender, $segment, $count ) {
+
+        return array_keys( array_slice( $this->db[ $gender ][ $segment ], 0, $count ) );
+    }
+
+    public function stats( $possibilities_by_segment ) {
+
+        $femaleScore = 0;
+        $maleScore   = 0;
+
+        foreach ( $possibilities_by_segment as $segment ) {
+            $femaleScore += array_sum( $segment[ 'female' ] );
+            $maleScore   += array_sum( $segment[ 'male' ] );
+        }
+
+        $gender = ( $maleScore > $femaleScore ) ? 'male' : 'female';
+
+        $stats = [
+            'first_name' => [],
+            'last_name'  => [],
+            'patronymic' => [],
+        ];
+
+        foreach ( $possibilities_by_segment as $segment ) {
+
+            $stats[ 'first_name' ][ $segment[ 'segment' ] ] = $segment[ $gender ][ 'first_name' ];
+            $stats[ 'last_name' ][ $segment[ 'segment' ] ]  = $segment[ $gender ][ 'last_name' ];
+            $stats[ 'patronymic' ][ $segment[ 'segment' ] ] = $segment[ $gender ][ 'patronymic' ];
+
+        }
+
+        return [
+            'stats'  => $stats,
+            'gender' => $gender,
+        ];
+
+    }
+
     protected function getPossibilitiesBySegment( array $segments ) {
         $possibilitiesBySegment = [];
         foreach ( $segments as $k => $segment ) {
@@ -72,6 +149,31 @@ class Detector {
             $possibilitiesBySegment [] = $possibilities;
         }
 
+
         return $possibilitiesBySegment;
+    }
+
+    private function bestConfidenceScore( $stats ) {
+        if ( ! $stats ) {
+            return false;
+        }
+        $best = [
+            'score'   => - 1,
+            'segment' => null,
+            'value'   => null,
+        ];
+        foreach ( $stats as $segment => $s ) {
+            foreach ( $s as $value => $score ) {
+                if ( $score > $best[ 'score' ] ) {
+                    $best = [
+                        'score'   => $score,
+                        'segment' => $segment,
+                        'value'   => $value,
+                    ];
+                }
+            }
+        }
+
+        return $best;
     }
 }

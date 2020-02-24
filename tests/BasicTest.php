@@ -6,8 +6,10 @@ use PHPUnit\Framework\TestCase;
 
 class BasicTest extends TestCase {
 
-    public function testBasicApi(  ) {
-        $this->assertEquals(1,1);
+    public function testBasicApi() {
+        $fiona = new \Librevlad\Fiona\Detector();
+        $data  = $fiona->detect( 'Алина Борисовна Ыыва Sdfg Ывап Хотченкова' );
+        $this->assertEquals( $data[ 'first_name' ], 'Иван' );
     }
 
 }
