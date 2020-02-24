@@ -17,7 +17,7 @@ class Detector {
         $this->db = $db;
     }
 
-    public function detect( $fio ) {
+    public function detect( $fio, $strict = false ) {
 
         $segments = explode( ' ', $fio );
 
@@ -65,11 +65,13 @@ class Detector {
             $return[ 'patronymic' ],
         ] );
         $unmatched = array_diff( $segments, $matched );
-        if ( count( $unmatched ) && ! $return[ 'last_name' ] ) {
-            $return[ 'last_name' ] = array_shift( $unmatched );
-        }
-        if ( count( $unmatched ) && ! $return[ 'patronymic' ] ) {
-            $return[ 'patronymic' ] = array_shift( $unmatched );
+        if ( ! $strict ) {
+            if ( count( $unmatched ) && ! $return[ 'last_name' ] ) {
+                $return[ 'last_name' ] = array_shift( $unmatched );
+            }
+            if ( count( $unmatched ) && ! $return[ 'patronymic' ] ) {
+                $return[ 'patronymic' ] = array_shift( $unmatched );
+            }
         }
 
         $return[ 'unmatched_segments' ] = $unmatched;
