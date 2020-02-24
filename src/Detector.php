@@ -19,13 +19,11 @@ class Detector {
 
     public function detect( $fio, $strict = false ) {
 
+        $fio = mb_convert_case( $fio, MB_CASE_TITLE, 'UTF-8' );
         $fio = str_replace( '  ', ' ', $fio );
         $fio = str_replace( '  ', ' ', $fio );
 
         $segments = explode( ' ', trim( $fio ) );
-        $segments = array_map( function ( $v ) {
-            return mb_convert_case( $v, MB_CASE_TITLE, 'UTF-8' );
-        }, $segments );
 
         $return = [
             'first_name'         => null,
