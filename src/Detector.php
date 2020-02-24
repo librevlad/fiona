@@ -19,7 +19,13 @@ class Detector {
 
     public function detect( $fio, $strict = false ) {
 
-        $segments = explode( ' ', $fio );
+        $fio = str_replace( '  ', ' ', $fio );
+        $fio = str_replace( '  ', ' ', $fio );
+
+        $segments = explode( ' ', trim( $fio ) );
+        $segments = array_map( function ( $v ) {
+            return mb_convert_case( $v, MB_CASE_TITLE, 'UTF-8' );
+        }, $segments );
 
         $return = [
             'first_name'         => null,
@@ -104,6 +110,17 @@ class Detector {
 
         return $possibilities;
 
+    }
+
+    public function better( $gender, $segment, $value1, $value2 ) {
+        $pop1 = $this->popularity( $gender, $segment, $value1 );
+        $pop2 = $this->popularity( $gender, $segment, $value2 );
+
+        return $pop1 > $pop2 ? $value1 : $value2;
+    }
+
+    public function popularity( $gender, $segment, $value ) {
+        return $this->db[ $gender ][ $segment ][ $value ] ?? 0;
     }
 
     public function mostPopular( $gender, $segment, $count ) {
