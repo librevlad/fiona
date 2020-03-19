@@ -19,16 +19,18 @@ class Detector {
 
     public function detect( $fio, $strict = false ) {
 
-        $fio = mb_convert_case( $fio, MB_CASE_TITLE, 'UTF-8' );
         $fio = str_replace( '  ', ' ', $fio );
         $fio = str_replace( '  ', ' ', $fio );
 
         $segments = explode( ' ', trim( $fio ) );
+        $segments = array_map( function ( $v ) {
+            return mb_convert_case( $v, MB_CASE_TITLE, 'UTF-8' );
+        }, $segments );
 
         $return = [
             'first_name'         => null,
-            'last_name'          => null,
             'patronymic'         => null,
+            'last_name'          => null,
             'gender'             => null,
             'unmatched_segments' => [],
         ];
@@ -65,16 +67,16 @@ class Detector {
 
         $matched   = array_intersect( $segments, [
             $return[ 'first_name' ],
-            $return[ 'last_name' ],
             $return[ 'patronymic' ],
+            $return[ 'last_name' ],
         ] );
         $unmatched = array_diff( $segments, $matched );
         if ( ! $strict ) {
-            if ( count( $unmatched ) && ! $return[ 'last_name' ] ) {
-                $return[ 'last_name' ] = array_shift( $unmatched );
-            }
             if ( count( $unmatched ) && ! $return[ 'patronymic' ] ) {
                 $return[ 'patronymic' ] = array_shift( $unmatched );
+            }
+            if ( count( $unmatched ) && ! $return[ 'last_name' ] ) {
+                $return[ 'last_name' ] = array_shift( $unmatched );
             }
         }
 
